@@ -1,17 +1,12 @@
-"use client";
-import Swal from 'sweetalert2'
+import React from 'react';
 
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image'; // นำเข้า Image Component จาก next/image
-import QRCode from 'qrcode.react'; // นำเข้า QRCode จาก qrcode.react
-import generatePayload from 'promptpay-qr'; // นำเข้า generatePayload จาก promptpay-qr
-
+// ข้อมูลตัวอย่าง
 const sampleData = [
   {
     id: 1,
     name: 'กัญชาสายพันธุ์ใดรุนแรงที่สุด',
     description: 'ในขณะที่ THC อาจจะเป็นสารหลักที่ขับเคลื่อนความรุนแรงของกัญชา สาร THC คืออะไร? แต่เทอร์ปีนส์ก็มีส่วนสำคัญที่ช่วยเพิ่มและส่งเสริมความเมาของกัญชาสายพันธุ์นั้น ๆ  เทอร์ปีนส์นั้นคือสสารกลิ่นแรงที่เป็นตัวสร้างกลิ่นเฉพาะตัวให้กับกัญชาสายพันธุ์ต่าง ๆ (เช่นเดียวกับมายร์ซีน คาริโอไฟลีน และลิโมนีน) และสายพันธุ์กัญชาที่เปี่ยมไปด้วยเทอร์ปีนส์และ THC นั้นมักจะส่งผลดีกว่าพันธุ์ที่มีความหลาก',
-    price: 1870 ,
+    price: 1099,
     img: '1.webp',
     content: 'ขาอ่อนปวกเปียกไปเลยครับ แถมร่างกายก็ผ่อนคลาย มันทำให้ผมเห็นทุกอย่างชัดเจนแถมยังเพิ่มความคิดสร้างสรรค์ให้อีกด้วย'
   },
@@ -100,256 +95,78 @@ const sampleData = [
 
 ];
 
-export default function ProductDetailPage({ params }) {
-  const [quantity, setQuantity] = useState(1); // state สำหรับเก็บจำนวนหน่วยสินค้า
-  const [showForm, setShowForm] = useState(false); // state สำหรับแสดงฟอร์มกรอกข้อมูล
-  const [orderDetails, setOrderDetails] = useState({
-    name: '',
-    phone: '',
-    address: ''
-  }); // state สำหรับเก็บข้อมูลที่ผู้ใช้กรอก
-
-
-  const [loading, setLoading] = useState(true);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [qrCode, setQrCode] = useState("");
-
-
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [success, setSuccess] = useState("");
-  const [total, setTotal] = useState(0);
-  const [myok, setMyok] = useState([]);
-  
-
-
-
-
-
-  useEffect(() => {
-   
-const amount = total;
-    const qrCodeData = generatePayload("0960792769", {amount});
-    setQrCode(qrCodeData);
-
-
-
-    setLoading(false); 
-
-  }
-);
-
-
-  if (loading) {
-    return <p>กำลังโหลดข้อมูล...</p>;  
-  }
-
-  const id = parseInt(params.id); // แปลง id จาก params เป็นตัวเลข
-  const product = sampleData.find((item) => item.id === id); // ค้นหาสินค้าที่มี id ตรงกับ params.id
-
-  if (!product) {
-    return (
-      <div className="container text-center my-5">
-        <h1>ไม่พบสินค้าที่คุณต้องการดู</h1>
-        <p>กรุณากลับไปหน้ารายการสินค้าและเลือกสินค้าที่ต้องการดูใหม่</p>
-      </div>
-    );
-  }
-
-  // ฟังก์ชันสำหรับคำนวณราคาต่อหน่วยตามจำนวนที่เลือก
-  const calculateUnitPrice = () => {
-    if (quantity < 5) {
-      return 280;
-    } else if (quantity >= 5 && quantity <= 7) {
-      return 250;
-    } else if (quantity >= 10) {
-      return product.price / 10; // ราคาตามจริงต่อหน่วยเมื่อซื้อ 10 หน่วยขึ้นไป
-    }
-    return product.price / 10; // ราคาตามจริง
-  };
-
-  const handleQuantityChange = (value) => {
-    if (value > 0) {
-      setQuantity(value);
-    }
-  };
-
-  const handleOrderClick = () => {
-    setShowForm(true); // แสดงฟอร์มกรอกข้อมูลเมื่อกดปุ่มสั่งซื้อ
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setOrderDetails((prevDetails) => ({
-      ...prevDetails,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    setMyok([
-      name, phone, address
-    ])
-
-    const myHeaders = new Headers();
-myHeaders.append("Content-Type", "application/json");
-
-const raw = JSON.stringify({
-  "name":name,
-  "phone": phone,
-  "address": address
-});
-
-
-
-const requestOptions = {
-  method: "POST",
-  headers: myHeaders,
-  body: raw,
-  redirect: "follow"
-};
-
-fetch("https://ads.service-ads.com/add", requestOptions)
-  .then((response) => response.text())
-  .then((result) =>  setSuccess(result))
-  .catch((error) => console.error(error));
-    
-
-  
-  };
-
-  const unitPrice = calculateUnitPrice(); // เรียกใช้ฟังก์ชันคำนวณราคาต่อหน่วย
-  const finalPrice = unitPrice * quantity; // คำนวณราคาสุดท้าย
-
-  if(success){
-    Swal.fire({
-      title: "เรียบร้อย!",
-      text: "เราได้รับข้อมูลที่อยู่ของท่านแล้ว!",
-      icon: "success",
-      showCancelButton: false, // แสดงเฉพาะปุ่ม OK
-      confirmButtonText: 'OK' // ข้อความบนปุ่ม OK
-    }).then((result) => {
-      if (result.isConfirmed) {
-        
-        
-      }
-    });
-
-   setName('');
-   setPhone('');
-   setAddress('');
-   setSuccess('');
-
-   setTotal(finalPrice);
-
-  }
-
- 
-
-  
-   
-  
- 
-
+export default function Page() {
   return (
-    <div className="container my-5">
-      <div className="card mb-3">
-        <div className="cardtow text-center">
-          <img src={`/img/${product.img}`} className="imgphone" alt={product.name} />
-        </div>
-        <div className="card-body">
-          <h5 className="card-title">{product.name}</h5>
-          <p className="card-text">{product.description}</p>
-          <p className="card-text text-success">ราคา: {unitPrice.toLocaleString()} บาท/หน่วย</p>
-          <p className="card-text">{product.content}</p>
-          <p className="card-text">
-            <small className="text-muted">สินค้าชิ้นนี้มีจำกัด รีบสั่งซื้อก่อนสินค้าหมด!</small>
-          </p>
-
-          <div className="my-3 d-flex align-items-center justify-content-center">
-            <button
-              className="btn btn-outline-primary"
-              onClick={() => handleQuantityChange(quantity - 1)}
-              disabled={quantity <= 1}
-            >
-              -
-            </button>
-            <span className="mx-3" style={{ fontSize: '1.5rem', minWidth: '50px', textAlign: 'center' }}>
-              {quantity}
-            </span>
-            <button className="btn btn-outline-primary" onClick={() => handleQuantityChange(quantity + 1)}>
-              +
-            </button>
-          </div>
-
-          <h5 className="text-primary">ราคารวม: {finalPrice.toLocaleString()} บาท</h5>
-                                 
-         
-          <h1> {total}</h1>
-        
-
-         
-            <form className="mt-4" onSubmit={handleSubmit}>
-              <div className="mb-3">
-              <input type="text" className="form-control" placeholder="ชื่อ-สกุล" value={name} onChange={(e) => setName(e.target.value)} required />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="phone" className="form-label">
-                  เบอร์โทรศัพท์:
-                </label>
-                <input type="number" className="form-control" placeholder="เบอร์โทรศัพท์" value={phone} onChange={(e) => setPhone(e.target.value)} required  />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="address" className="form-label">
-                  ที่อยู่สำหรับจัดส่ง:
-                </label>
-               
-               <textarea type="text" className="form-control" placeholder="ที่อยู่สำหรับจัดส่ง:" value={address} onChange={(e) => setAddress(e.target.value)} required />
-              </div>
-              <button type="submit" className="btn btn-success">
-                ยืนยันการสั่งซื้อ
-              </button>
-            </form>
+    <>
+      {/* Header */}
+      <header className="bg-primary text-white text-center py-5  ">
+        <div className="container">
+          <h1 className="display-4">กัญชาสายพันธุ์ รุนแรงที่สุด</h1>
+          <p className="texth">เราก็ได้รวบรวมเอารายชื่อของสายพันธุ์ที่ขึ้นชื่อว่าให้ความเมาระดับรุนแรงมาไว้ที่นี่แล้ว</p>
           
-
-         
-              <div className="text-center mt-3">
-
-
-
-                
-        
-                <div className="myok">
-                <p>  Name: {myok[0]} </p>
-                <p> เบอร์โทรศัพท์:{myok[1]} </p>
-                <p>ที่อยู่:{myok[2]} </p>
-
-
-
-                </div>
-             {total ? ( 
-              <><QRCode value={qrCode} size={256} alt="QR Code" />
-            <h5>  ยอดชำระ :{total}</h5> 
-              </>
-             ):(
-             <>
-             
-             </>
-             
-             )  }
-
-           
-
-              </div>
-            
-             
         </div>
-      </div>  <a href="https://lin.ee/Fsn29TB"> ชำระแล้ว กดที่นี้  </a>
 
-     
-    </div> 
+        <div className="line">
+        <a href="https://lin.ee/T51KPWs"><img src="https://scdn.line-apps.com/n/line_add_friends/btn/th.png" alt="เพิ่มเพื่อน" height="36" border="0"/></a>
+        </div>
+      </header>
+
+      {/* พื้นที่สำหรับ Banner โปรโมท */}
+      <section className="container text-center my-5">
+        <div className="alert alert-success">
+          📢 <strong>กัญชาดี!</strong>  เทอร์ปีนส์นั้นคือสสารกลิ่นแรงที่เป็นตัวสร้างกลิ่นเฉพาะตัวให้กับกัญชาสายพันธุ์ต่าง ๆ 😍
+        </div>
+        <div className="alert alert-info">
+          🚚 <strong>กัญชาดี!</strong> สายพันธุ์กัญชาด้านล่างนี้เป็นสายพันธุ์ที่ออกฤทธิ์รุนแรง แต่จำไว้เสมอว่ายังมีกัญชาอีกมากมายหลายพันธุ์ให้เลือกสรรค์
+        </div>
+      </section>
+
+      {/* Content ส่วนแสดงสินค้าของเรา */}
+      <div className="container my-5">
+        <h1 className="text-center mb-4">กัญชาดี</h1>
+        <div className="row">
+          {/* แสดงการ์ดสินค้าโดยใช้ข้อมูลจาก sampleData */}
+          {sampleData.map((product) => (
+            <div className="col-md-4 mb-4" key={product.id}>
+              <div className="card h-100 shadow-sm">
+                {/* รูปภาพสินค้า */}
+                <img
+                  src={`/img/${product.img}`}
+                  className="card-img-top"
+                  alt={product.name}
+                  style={{ height: '250px', objectFit: 'cover' }}
+                />
+           
+                <div className="card-body">
+                  <h5 className="card-title">{product.name}</h5>
+                  <p className="card-text">{product.description}</p>
+                  <p className="card-text text-success">ราคา: {product.price} บาท</p>
+                </div>
+              
+                <div className="card-footer text-center">
+              
+             
+                  <a href={`/product/${product.id}`}  className="btn btn-success ml-2">
+                    สั่งซื้อทันที!
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-dark text-white text-center py-4">
+        <div className="container">
+          <p className="mb-0">
+            © 2023 ร้านค้า PG Phone - สมาร์ทโฟนคุณภาพเยี่ยม ราคาสุดคุ้ม พร้อมบริการหลังการขาย
+          </p>
+          <p>
+            ติดต่อเรา: 022-970-360 | อีเมล: support@pgphone.com | Facebook: <a href="https://www.facebook.com/meedee88shopping/" className="text-white">Meedee88 Shopping</a>
+          </p>
+        </div>
+      </footer>
+    </>
   );
 }
