@@ -130,7 +130,7 @@ export default function ProductDetailPage({ params }) {
   useEffect(() => {
    
 const amount = total;
-    const qrCodeData = generatePayload("0960792769", {amount});
+    const qrCodeData = generatePayload("1969800077553", {amount});
     setQrCode(qrCodeData);
 
 
